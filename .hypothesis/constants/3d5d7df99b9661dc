@@ -1,0 +1,4 @@
+# file: /Users/toku/Documents/hondana/src/cli.py
+# hypothesis_version: 6.148.2
+
+['\n本当に削除しますか？', '--author', '--confirm', '--description', '--output', '--publication-date', '--publisher', '--title', '__main__', 'author', 'book_id', 'content', 'description', 'impression_id', 'isbn', 'output', 'publication_date', 'publisher', 'title', 'キャンセルしました', '出力ディレクトリ', '新しいタイトル', '新しい出版日', '新しい出版社', '新しい著者', '新しい説明', '登録されている本がありません', '確認プロンプトをスキップ']

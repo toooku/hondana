@@ -1,0 +1,4 @@
+# file: /Users/toku/Documents/hondana/src/openbd_client.py
+# hypothesis_version: 6.148.2
+
+[', ', 'PublicationDate', 'author', 'content', 'cover', 'cover_url', 'description', 'isbn', 'onix', 'publication_date', 'publisher', 'summary', 'title']

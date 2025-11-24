@@ -1,0 +1,4 @@
+# file: /Users/toku/Documents/hondana/src/models.py
+# hypothesis_version: 6.148.2
+
+['+00:00', 'Book', 'Impression', 'StatusHistory', 'Z', 'author', 'book_id', 'changed_at', 'content', 'cover_url', 'created_at', 'description', 'id', 'isbn', 'new_status', 'old_status', 'publication_date', 'publisher', 'status', 'title', 'updated_at', '積読']

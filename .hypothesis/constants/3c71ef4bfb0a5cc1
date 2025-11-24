@@ -1,0 +1,4 @@
+# file: /Users/toku/Documents/hondana/src/static_site_generator.py
+# hypothesis_version: 6.148.2
+
+['            </div>\n', '"', '&', '&#39;', '&amp;', '&gt;', '&lt;', '&quot;', "'", '<', '>', 'books', 'index.html', 'output', 'style.css', 'utf-8', 'w']

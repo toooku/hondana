@@ -1,0 +1,4 @@
+# file: /Users/toku/Documents/hondana/src/repository.py
+# hypothesis_version: 6.148.2
+
+['books.json', 'data', 'impressions.json', 'r', 'status_history.json', 'utf-8', 'w']
