@@ -2,9 +2,10 @@
 
 import os
 from typing import List
-from src.models import Book, Impression
+
 from src.book_service import BookService
 from src.impression_service import ImpressionService
+from src.models import Book, Impression
 
 
 class StaticSiteGenerator:
@@ -14,7 +15,7 @@ class StaticSiteGenerator:
         self,
         book_service: BookService,
         impression_service: ImpressionService,
-        output_dir: str = "output"
+        output_dir: str = "output",
     ):
         """
         Initialize the static site generator.
@@ -273,9 +274,7 @@ footer {
         Args:
             book: The Book instance to generate a page for
         """
-        impressions = self.impression_service.list_impressions_by_book(
-            book.id
-        )
+        impressions = self.impression_service.list_impressions_by_book(book.id)
 
         html_content = f"""<!DOCTYPE html>
 <html lang="ja">

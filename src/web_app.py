@@ -1,20 +1,65 @@
 """Flask web application for book library v2."""
 
-from flask import Flask, request, redirect, url_for
+from flask import Flask, redirect, request, url_for
+
 from src.book_service import BookService
-from src.status_service import StatusService
 from src.markdown_impression_service import MarkdownImpressionService
 from src.repository import DataRepository
-
+from src.status_service import StatusService
 
 app = Flask(__name__)
-app.config['JSON_AS_ASCII'] = False
+app.config["JSON_AS_ASCII"] = False
+
+# Constants
+STATUS_LABELS = {"積読": "積読", "読書中": "読書中", "読了": "読了"}
+STATUS_CLASSES = {"積読": "unread", "読書中": "reading", "読了": "completed"}
 
 # Initialize services
 repository = DataRepository()
 book_service = BookService(repository)
 status_service = StatusService(repository)
 markdown_impression_service = MarkdownImpressionService()
+
+
+def generate_cover_html(book):
+    """Generate cover image HTML for a book."""
+    if book.cover_url:
+        return f"""<div style="width: 300px; height: 400px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img src="{book.cover_url}" alt="{book.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" onerror="this.parentElement.innerHTML='<div style=\\'color: #999;\\'>書影なし</div>'">
+        </div>"""
+    return '<div style="width: 300px; height: 400px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; display: flex; align-items: center; justify-content: center;"><div style="color: #999;">書影なし</div></div>'
+
+
+def generate_status_select(book):
+    """Generate status selection form HTML."""
+    options = []
+    for status_value, status_label in STATUS_LABELS.items():
+        selected = "selected" if book.status == status_value else ""
+        options.append(
+            f'<option value="{status_value}" {selected}>{status_label}</option>'
+        )
+
+    return f"""
+    <h2>ステータス変更</h2>
+    <form method="POST" action="/books/{book.id}/status">
+        <select name="status">
+            {"".join(options)}
+        </select>
+        <button type="submit">変更</button>
+    </form>
+    """
+
+
+def generate_delete_form(book):
+    """Generate book deletion form HTML."""
+    return f"""
+    <h2>本の削除</h2>
+    <p style="color: #c62828;"><strong>注意:</strong> この操作は取り消せません。本と関連する感想も削除されます。</p>
+    <form method="POST" action="/books/{book.id}/delete" onsubmit="return confirm('本当にこの本を削除しますか？')">
+        <button type="submit" style="background: #c62828; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">本を削除</button>
+    </form>
+    """
+
 
 # Fetch missing cover URLs for existing books
 try:
@@ -24,7 +69,7 @@ except Exception:
     pass
 
 
-@app.route('/')
+@app.route("/")
 def index():
     """Home page."""
     import random
@@ -39,7 +84,7 @@ def index():
     app.logger.info(f"Original order: {original_order}")
     app.logger.info(f"Shuffled order: {shuffled_order}")
     app.logger.info(f"Order changed: {original_order != shuffled_order}")
-    
+
     # ステータス別の本数を計算
     status_counts = {}
     for book in books:
@@ -84,13 +129,15 @@ def index():
     for book in books:
         cover_html = ""
         if book.cover_url:
-            cover_html = f'''<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            cover_html = f"""<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                 <img src="{book.cover_url}" alt="{book.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" onerror="this.parentElement.innerHTML='<div style=\\'color: #999; font-size: 0.9em;\\'>書影なし</div>'">
-            </div>'''
+            </div>"""
         else:
             cover_html = '<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;"><div style="color: #999; font-size: 0.9em;">書影なし</div></div>'
 
-        status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}.get(book.status, "unread")
+        status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}.get(
+            book.status, "unread"
+        )
 
         html += f"""
             <div class="book-card">
@@ -112,16 +159,16 @@ def index():
     return html
 
 
-@app.route('/books')
+@app.route("/books")
 def books_list():
     """List all books."""
     books = book_service.list_books()
     books_by_status = {
         "積読": [b for b in books if b.status == "積読"],
         "読書中": [b for b in books if b.status == "読書中"],
-        "読了": [b for b in books if b.status == "読了"]
+        "読了": [b for b in books if b.status == "読了"],
     }
-    
+
     html = """
     <!DOCTYPE html>
     <html lang="ja">
@@ -148,28 +195,34 @@ def books_list():
         <h1>本一覧</h1>
         <a href="/">← ホームに戻る</a>
     """
-    
-    for status, label in [("積読", "積読（未読）"), ("読書中", "読書中"), ("読了", "読了")]:
+
+    for status, label in [
+        ("積読", "積読（未読）"),
+        ("読書中", "読書中"),
+        ("読了", "読了"),
+    ]:
         books_in_status = books_by_status[status]
         if not books_in_status:
             continue
-        
-        status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}[status]
+
+        status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}[
+            status
+        ]
         html += f"""
         <div class="section">
             <h2>{label} ({len(books_in_status)}冊)</h2>
             <div class="book-list">
         """
-        
+
         for book in books_in_status:
             cover_html = ""
             if book.cover_url:
-                cover_html = f'''<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                cover_html = f"""<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     <img src="{book.cover_url}" alt="{book.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" onerror="this.parentElement.innerHTML='<div style=\\'color: #999; font-size: 0.9em;\\'>書影なし</div>'">
-                </div>'''
+                </div>"""
             else:
                 cover_html = '<div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;"><div style="color: #999; font-size: 0.9em;">書影なし</div></div>'
-            
+
             html += f"""
                 <div class="book-card">
                     {cover_html}
@@ -180,12 +233,12 @@ def books_list():
                     <a href="/books/{book.id}">詳細</a>
                 </div>
             """
-        
+
         html += """
             </div>
         </div>
         """
-    
+
     html += """
     </body>
     </html>
@@ -193,29 +246,25 @@ def books_list():
     return html
 
 
-@app.route('/books/<book_id>')
+@app.route("/books/<book_id>")
 def book_detail(book_id):
     """Show book detail."""
     try:
         book = book_service.get_book(book_id)
     except ValueError:
         return "Book not found", 404
-    
+
     try:
         impression = markdown_impression_service.get_impression(book_id)
     except Exception:
         impression = None
-    
-    status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}.get(book.status, "unread")
-    
-    cover_html = ""
-    if book.cover_url:
-        cover_html = f'''<div style="width: 300px; height: 400px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-            <img src="{book.cover_url}" alt="{book.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" onerror="this.parentElement.innerHTML='<div style=\\'color: #999;\\'>書影なし</div>'">
-        </div>'''
-    else:
-        cover_html = '<div style="width: 300px; height: 400px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; display: flex; align-items: center; justify-content: center;"><div style="color: #999;">書影なし</div></div>'
-    
+
+    status_class = {"積読": "unread", "読書中": "reading", "読了": "completed"}.get(
+        book.status, "unread"
+    )
+
+    cover_html = generate_cover_html(book)
+
     html = f"""
     <!DOCTYPE html>
     <html lang="ja">
@@ -246,23 +295,10 @@ def book_detail(book_id):
         <p><strong>ステータス:</strong> <span class="status status-{status_class}">{book.status}</span></p>
         <p><strong>説明:</strong> {book.description}</p>
         
-        <h2>ステータス変更</h2>
-        <form method="POST" action="/books/{book_id}/status">
-            <select name="status">
-                <option value="積読" {"selected" if book.status == "積読" else ""}>積読</option>
-                <option value="読書中" {"selected" if book.status == "読書中" else ""}>読書中</option>
-                <option value="読了" {"selected" if book.status == "読了" else ""}>読了</option>
-            </select>
-            <button type="submit">変更</button>
-        </form>
-
-        <h2>本の削除</h2>
-        <p style="color: #c62828;"><strong>注意:</strong> この操作は取り消せません。本と関連する感想も削除されます。</p>
-        <form method="POST" action="/books/{book_id}/delete" onsubmit="return confirm('本当にこの本を削除しますか？')">
-            <button type="submit" style="background: #c62828; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">本を削除</button>
-        </form>
+        {generate_status_select(book)}
+        {generate_delete_form(book)}
     """
-    
+
     if impression:
         html += f"""
         <h2>感想</h2>
@@ -270,7 +306,7 @@ def book_detail(book_id):
             {impression}
         </div>
         """
-    
+
     html += """
     </body>
     </html>
@@ -278,18 +314,18 @@ def book_detail(book_id):
     return html
 
 
-@app.route('/books/<book_id>/status', methods=['POST'])
+@app.route("/books/<book_id>/status", methods=["POST"])
 def update_status(book_id):
     """Update book status."""
-    new_status = request.form.get('status')
+    new_status = request.form.get("status")
     try:
         status_service.set_status(book_id, new_status)
-        return redirect(url_for('book_detail', book_id=book_id))
+        return redirect(url_for("book_detail", book_id=book_id))
     except ValueError as e:
         return f"Error: {str(e)}", 400
 
 
-@app.route('/books/<book_id>/delete', methods=['POST'])
+@app.route("/books/<book_id>/delete", methods=["POST"])
 def delete_book(book_id):
     """Delete a book."""
     try:
@@ -322,7 +358,8 @@ def delete_book(book_id):
         </html>
         """
     except ValueError as e:
-        return f"""
+        return (
+            f"""
         <!DOCTYPE html>
         <html lang="ja">
         <head>
@@ -342,10 +379,12 @@ def delete_book(book_id):
             </div>
         </body>
         </html>
-        """, 400
+        """,
+            400,
+        )
 
 
-@app.route('/scan')
+@app.route("/scan")
 def scan():
     """Barcode scanning page."""
     return """<!DOCTYPE html>
@@ -554,13 +593,13 @@ def scan():
 </html>"""
 
 
-@app.route('/add-book-from-isbn', methods=['POST'])
+@app.route("/add-book-from-isbn", methods=["POST"])
 def add_book_from_isbn():
     """Add book from ISBN input."""
     try:
-        isbn = request.form.get('isbn', '').strip() if request.form else ''
+        isbn = request.form.get("isbn", "").strip() if request.form else ""
     except Exception:
-        isbn = ''
+        isbn = ""
 
     if not isbn:
         return "ISBNを入力してください", 400
@@ -593,7 +632,8 @@ def add_book_from_isbn():
         </html>
         """
     except Exception as e:
-        return f"""
+        return (
+            f"""
         <!DOCTYPE html>
         <html lang="ja">
         <head>
@@ -613,39 +653,41 @@ def add_book_from_isbn():
             </div>
         </body>
         </html>
-        """, 400
+        """,
+            400,
+        )
 
 
-@app.route('/api/add-book-from-isbn', methods=['POST'])
+@app.route("/api/add-book-from-isbn", methods=["POST"])
 def api_add_book_from_isbn():
     """API endpoint to add book from ISBN (returns JSON)."""
     try:
         data = request.get_json() if request.is_json else request.form
-        isbn = data.get('isbn', '').strip() if data else ''
+        isbn = data.get("isbn", "").strip() if data else ""
 
         if not isbn:
-            return {'success': False, 'error': 'ISBNを入力してください'}, 400
+            return {"success": False, "error": "ISBNを入力してください"}, 400
 
         book = book_service.create_book(isbn)
 
         return {
-            'success': True,
-            'book': {
-                'id': book.id,
-                'title': book.title,
-                'author': book.author,
-                'publisher': book.publisher,
-                'isbn': book.isbn
-            }
+            "success": True,
+            "book": {
+                "id": book.id,
+                "title": book.title,
+                "author": book.author,
+                "publisher": book.publisher,
+                "isbn": book.isbn,
+            },
         }
 
     except book_service.ISBNAlreadyExistsError as e:
-        return {'success': False, 'error': str(e)}, 409
+        return {"success": False, "error": str(e)}, 409
     except Exception as e:
-        return {'success': False, 'error': str(e)}, 500
+        return {"success": False, "error": str(e)}, 500
 
 
-@app.route('/generate-site')
+@app.route("/generate-site")
 def generate_site_page():
     """Generate site page."""
     html = """
@@ -675,20 +717,18 @@ def generate_site_page():
     return html
 
 
-@app.route('/generate-site', methods=['POST'])
+@app.route("/generate-site", methods=["POST"])
 def generate_site():
     """Generate static site."""
     try:
-        from src.static_site_generator_v2 import StaticSiteGeneratorV2
         from src.impression_service import ImpressionService
-        
+        from src.static_site_generator_v2 import StaticSiteGeneratorV2
+
         # Create v1 impression service for compatibility
         impression_service = ImpressionService(repository)
-        
+
         generator = StaticSiteGeneratorV2(
-            book_service,
-            impression_service,
-            markdown_impression_service
+            book_service, impression_service, markdown_impression_service
         )
         generator.generate()
         return "サイトを生成しました。output/index.htmlを確認してください。"
@@ -696,5 +736,5 @@ def generate_site():
         return f"Error: {str(e)}", 500
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True, port=8000)

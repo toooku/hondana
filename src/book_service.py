@@ -1,11 +1,12 @@
 """Service for managing books."""
 
-from typing import List, Optional
 from datetime import datetime, timezone
+from typing import List, Optional
+
+from src.markdown_impression_service import MarkdownImpressionService
 from src.models import Book
 from src.openbd_client import OpenBDClient
 from src.repository import DataRepository
-from src.markdown_impression_service import MarkdownImpressionService
 
 
 class BookService:
@@ -13,12 +14,19 @@ class BookService:
 
     class ISBNAlreadyExistsError(Exception):
         """Raised when trying to create a book with an ISBN that already exists."""
+
         pass
 
-    def __init__(self, repository: Optional[DataRepository] = None, markdown_impression_service: Optional[MarkdownImpressionService] = None):
+    def __init__(
+        self,
+        repository: Optional[DataRepository] = None,
+        markdown_impression_service: Optional[MarkdownImpressionService] = None,
+    ):
         """Initialize the service with a repository."""
         self.repository = repository or DataRepository()
-        self.markdown_impression_service = markdown_impression_service or MarkdownImpressionService()
+        self.markdown_impression_service = (
+            markdown_impression_service or MarkdownImpressionService()
+        )
         self._books = self.repository.load_books()
 
     def create_book(self, isbn: str) -> Book:
@@ -44,7 +52,9 @@ class BookService:
         for book in existing_books:
             existing_normalized_isbn = book.isbn.replace("-", "")
             if existing_normalized_isbn == normalized_isbn:
-                raise self.ISBNAlreadyExistsError(f"Book with ISBN {isbn} already exists in the library")
+                raise self.ISBNAlreadyExistsError(
+                    f"Book with ISBN {isbn} already exists in the library"
+                )
 
         # Fetch book info from OpenBD API
         book_info = OpenBDClient.fetch_book_info(isbn)
@@ -134,9 +144,7 @@ class BookService:
                 setattr(book, key, value)
 
         # Update the updated_at timestamp
-        book.updated_at = (
-            datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-        )
+        book.updated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         # Persist to file
         self.repository.save_books(self._books)
@@ -178,12 +186,14 @@ class BookService:
                     if cover_url:
                         book.cover_url = cover_url
                         book.updated_at = (
-                            datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                            datetime.now(timezone.utc)
+                            .isoformat()
+                            .replace("+00:00", "Z")
                         )
                         updated = True
                 except (OpenBDClient.ISBNNotFoundError, OpenBDClient.NetworkError):
                     # Skip if we can't fetch the cover
                     pass
-        
+
         if updated:
             self.repository.save_books(self._books)

@@ -1,43 +1,43 @@
 """Markdown to HTML converter."""
 
-import markdown
 from typing import Optional
+
+import markdown
 
 
 class MarkdownConverter:
     """Converter for transforming Markdown to HTML."""
-    
+
     @staticmethod
     def convert_to_html(markdown_text: str) -> str:
         """Convert Markdown text to HTML.
-        
+
         Args:
             markdown_text: Markdown formatted text
-            
+
         Returns:
             HTML formatted text
         """
         if not markdown_text:
             return ""
-        
+
         try:
             html = markdown.markdown(
-                markdown_text,
-                extensions=['extra', 'codehilite', 'toc']
+                markdown_text, extensions=["extra", "codehilite", "toc"]
             )
             return html
         except Exception:
             # If conversion fails, return escaped text
             return f"<p>{markdown_text}</p>"
-    
+
     @staticmethod
     def wrap_in_html_document(html_content: str, title: str = "Document") -> str:
         """Wrap HTML content in a complete HTML document.
-        
+
         Args:
             html_content: HTML content to wrap
             title: Title for the HTML document
-            
+
         Returns:
             Complete HTML document
         """

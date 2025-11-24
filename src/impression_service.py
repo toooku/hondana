@@ -1,7 +1,8 @@
 """Service for managing impressions (reviews/comments)."""
 
-from typing import List, Optional
 from datetime import datetime, timezone
+from typing import List, Optional
+
 from src.models import Impression
 from src.repository import DataRepository
 
@@ -24,14 +25,14 @@ class ImpressionService:
 
         Returns:
             The created Impression instance
-            
+
         Raises:
             ValueError: If content is empty or only whitespace
         """
         # Validate input
         if not content or not content.strip():
             raise ValueError("Impression content cannot be empty")
-        
+
         impression = Impression(
             book_id=book_id,
             content=content,
@@ -72,7 +73,9 @@ class ImpressionService:
         """
         return [imp for imp in self._impressions if imp.book_id == book_id]
 
-    def update_impression(self, impression_id: str, content: str) -> Optional[Impression]:
+    def update_impression(
+        self, impression_id: str, content: str
+    ) -> Optional[Impression]:
         """
         Update an impression's content.
 
@@ -82,14 +85,14 @@ class ImpressionService:
 
         Returns:
             The updated Impression instance or None if not found
-            
+
         Raises:
             ValueError: If content is empty or only whitespace
         """
         # Validate input
         if not content or not content.strip():
             raise ValueError("Impression content cannot be empty")
-        
+
         impression = self.get_impression(impression_id)
         if not impression:
             return None
@@ -121,7 +124,9 @@ class ImpressionService:
         if not impression:
             return False
 
-        self._impressions = [imp for imp in self._impressions if imp.id != impression_id]
+        self._impressions = [
+            imp for imp in self._impressions if imp.id != impression_id
+        ]
 
         # Persist to file
         self.repository.save_impressions(self._impressions)

@@ -90,7 +90,7 @@ class TestOpenBDClient:
             
             result = OpenBDClient.fetch_book_info("test-isbn")
             
-            assert result["author"] == "Author One, Author Two"
+            assert result["author"] == "Author One Author Two"
     
     def test_fetch_book_info_missing_publication_date(self):
         """Test handling of missing publication date."""

@@ -33,7 +33,7 @@ env/
 *~
 
 # Data and output
-# data/*.json  # 一時的にコメントアウト - AWSデプロイ用
+# data/*.json
 output/
 
 # Testing
@@ -44,3 +44,5 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+.hypothesis

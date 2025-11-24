@@ -1,10 +1,11 @@
 """CLI commands for book library v2 features."""
 
 import click
-from src.status_service import StatusService
+
+from src.book_service import BookService
 from src.markdown_impression_service import MarkdownImpressionService
 from src.repository import DataRepository
-from src.book_service import BookService
+from src.status_service import StatusService
 
 
 def get_v2_services():
@@ -37,7 +38,7 @@ def set_status(book_id: str, status: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         book = status_service.set_status(book_id, status)
         click.echo(f"✓ ステータスを変更しました")
@@ -61,13 +62,13 @@ def show_status(book_id: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         status = status_service.get_status(book_id)
         history = status_service.get_status_history(book_id)
-        
+
         click.echo(f"現在のステータス: {status}")
-        
+
         if history:
             click.echo(f"\nステータス変更履歴:")
             for h in history:
@@ -90,16 +91,16 @@ def list_by_status(status: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         books = status_service.get_books_by_status(status)
-        
+
         if not books:
             click.echo(f"ステータス '{status}' の本がありません")
             return
-        
+
         click.echo(f"\nステータス '{status}' の本 ({len(books)}冊):\n")
-        
+
         for book in books:
             click.echo(f"  {book.title}")
             click.echo(f"    著者: {book.author}")
@@ -131,11 +132,11 @@ def add_impression(book_id: str, content: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         # Verify book exists
         book = book_service.get_book(book_id)
-        
+
         # Create impression
         impression = markdown_impression_service.create_impression(book_id, content)
         click.echo(f"✓ 感想を追加しました")
@@ -159,18 +160,18 @@ def get_impression(book_id: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         # Verify book exists
         book = book_service.get_book(book_id)
-        
+
         # Get impression
         content = markdown_impression_service.get_impression(book_id)
-        
+
         if not content:
             click.echo(f"本 '{book.title}' の感想がありません")
             return
-        
+
         click.echo(f"本: {book.title}\n")
         click.echo(content)
     except ValueError as e:
@@ -193,11 +194,11 @@ def update_impression(book_id: str, content: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         # Verify book exists
         book = book_service.get_book(book_id)
-        
+
         # Update impression
         impression = markdown_impression_service.update_impression(book_id, content)
         click.echo(f"✓ 感想を更新しました")
@@ -220,14 +221,14 @@ def delete_impression(book_id: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         # Verify book exists
         book = book_service.get_book(book_id)
-        
+
         # Delete impression
         deleted = markdown_impression_service.delete_impression(book_id)
-        
+
         if deleted:
             click.echo(f"✓ 感想を削除しました")
             click.echo(f"  本: {book.title}")

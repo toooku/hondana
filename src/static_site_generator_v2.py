@@ -2,11 +2,16 @@
 
 import os
 from typing import Dict, List
-from src.models import Book
+
 from src.book_service import BookService
 from src.impression_service import ImpressionService
-from src.markdown_impression_service import MarkdownImpressionService
 from src.markdown_converter import MarkdownConverter
+from src.markdown_impression_service import MarkdownImpressionService
+from src.models import Book
+
+
+# Constants
+STATUS_CLASSES = {"積読": "unread", "読書中": "reading", "読了": "completed"}
 
 
 class StaticSiteGeneratorV2:
@@ -17,7 +22,7 @@ class StaticSiteGeneratorV2:
         book_service: BookService,
         impression_service: ImpressionService,
         markdown_impression_service: MarkdownImpressionService,
-        output_dir: str = "output"
+        output_dir: str = "output",
     ):
         """Initialize the v2 static site generator.
 
@@ -32,6 +37,31 @@ class StaticSiteGeneratorV2:
         self.markdown_impression_service = markdown_impression_service
         self.output_dir = output_dir
 
+    def _generate_cover_html(self, book: Book) -> str:
+        """Generate cover image HTML for a book."""
+        if book.cover_url:
+            return f'<img src="{self._escape_html(book.cover_url)}" alt="{self._escape_html(book.title)}">'
+        return '<div class="book-cover-placeholder">書影なし</div>'
+
+    def _generate_book_card_html(self, book: Book) -> str:
+        """Generate book card HTML for a book."""
+        cover_html = self._generate_cover_html(book)
+        status_class = STATUS_CLASSES.get(book.status, "unread")
+
+        return f"""<a href="books/{book.id}.html" style="text-decoration: none;">
+    <div class="book-card">
+        <div class="book-cover">
+            {cover_html}
+        </div>
+        <div class="book-info">
+            <h3>{self._escape_html(book.title)}</h3>
+            <p class="author">{self._escape_html(book.author)}</p>
+            <p class="publisher">{self._escape_html(book.publisher)}</p>
+            <span class="book-status status-{status_class}">{book.status}</span>
+        </div>
+    </div>
+</a>"""
+
     def generate(self) -> None:
         """Generate the static HTML site with v2 features."""
         os.makedirs(self.output_dir, exist_ok=True)
@@ -42,6 +72,7 @@ class StaticSiteGeneratorV2:
 
         # 全ての本をランダムに並べ替える
         import random
+
         random.shuffle(books)
 
         self._generate_css()
@@ -437,26 +468,7 @@ main {
 """
 
         for book in books:
-            cover_html = ""
-            if book.cover_url:
-                cover_html = f'<img src="{self._escape_html(book.cover_url)}" alt="{self._escape_html(book.title)}">'
-            else:
-                cover_html = f'<div class="book-cover-placeholder">書影なし</div>'
-
-            html_content += f"""            <a href="books/{book.id}.html" style="text-decoration: none;">
-                <div class="book-card">
-                    <div class="book-cover">
-                        {cover_html}
-                    </div>
-                    <div class="book-info">
-                        <h3>{self._escape_html(book.title)}</h3>
-                        <p class="author">{self._escape_html(book.author)}</p>
-                        <p class="publisher">{self._escape_html(book.publisher)}</p>
-                        <span class="book-status status-{self._get_status_class(book.status)}">{book.status}</span>
-                    </div>
-                </div>
-            </a>
-"""
+            html_content += f"            {self._generate_book_card_html(book)}\n"
 
         html_content += """
         </div>
@@ -491,7 +503,9 @@ main {
         v1_impressions = self.impression_service.list_impressions_by_book(book.id)
 
         # Get Markdown impression
-        markdown_content = self.markdown_impression_service.get_impression(book.id, book.title)
+        markdown_content = self.markdown_impression_service.get_impression(
+            book.id, book.title
+        )
 
         cover_html = ""
         if book.cover_url:
@@ -579,13 +593,8 @@ main {
             .replace("'", "&#39;")
         )
 
-
     @staticmethod
     def _get_status_class(status: str) -> str:
         """Get CSS class for status."""
-        status_map = {
-            "積読": "unread",
-            "読書中": "reading",
-            "読了": "completed"
-        }
+        status_map = {"積読": "unread", "読書中": "reading", "読了": "completed"}
         return status_map.get(status, "unread")

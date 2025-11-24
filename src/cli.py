@@ -1,13 +1,15 @@
 """CLI interface for the book library application."""
 
-import click
 from typing import Optional
+
+import click
+
 from src.book_service import BookService
 from src.impression_service import ImpressionService
 from src.markdown_impression_service import MarkdownImpressionService
-from src.static_site_generator_v2 import StaticSiteGeneratorV2
-from src.repository import DataRepository
 from src.openbd_client import OpenBDClient
+from src.repository import DataRepository
+from src.static_site_generator_v2 import StaticSiteGeneratorV2
 
 
 def get_services():
@@ -43,7 +45,7 @@ def add_book(isbn: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     try:
         book = book_service.create_book(isbn)
         click.echo(f"✓ 本を登録しました")
@@ -70,7 +72,7 @@ def list_books():
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     books = book_service.list_books()
 
     if not books:
@@ -104,7 +106,7 @@ def show_book(book_id: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     book = book_service.get_book(book_id)
 
     if not book:
@@ -161,7 +163,7 @@ def update_book(
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     book = book_service.get_book(book_id)
 
     if not book:
@@ -205,7 +207,7 @@ def delete_book(book_id: str, confirm: bool):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     book = book_service.get_book(book_id)
 
     if not book:
@@ -257,7 +259,7 @@ def add_impression(book_id: str, content: str):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     book = book_service.get_book(book_id)
 
     if not book:
@@ -286,11 +288,11 @@ def update_impression(impression_id: str, content: str):
         content: 新しい感想の内容
     """
     try:
-        _, impression_service = get_services()
+        _, impression_service, _ = get_services()
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     impression = impression_service.get_impression(impression_id)
 
     if not impression:
@@ -298,7 +300,9 @@ def update_impression(impression_id: str, content: str):
         raise SystemExit(1)
 
     try:
-        updated_impression = impression_service.update_impression(impression_id, content)
+        updated_impression = impression_service.update_impression(
+            impression_id, content
+        )
         click.echo(f"✓ 感想を更新しました")
         click.echo(f"  ID: {updated_impression.id}")
         click.echo(f"  更新日: {updated_impression.updated_at}")
@@ -321,7 +325,7 @@ def delete_impression(impression_id: str, confirm: bool):
     except IOError as e:
         click.echo(f"✗ データエラー: {str(e)}", err=True)
         raise SystemExit(1)
-    
+
     impression = impression_service.get_impression(impression_id)
 
     if not impression:

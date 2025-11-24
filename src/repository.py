@@ -3,6 +3,7 @@
 import json
 import os
 from typing import List, Optional
+
 from src.models import Book, Impression, StatusHistory
 
 
@@ -29,7 +30,7 @@ class DataRepository:
 
     def _read_json(self, filepath: str) -> list:
         """Read JSON file and return data.
-        
+
         Raises:
             IOError: If file is corrupted and cannot be recovered
         """
@@ -55,7 +56,7 @@ class DataRepository:
 
     def load_books(self) -> List[Book]:
         """Load books from file.
-        
+
         Raises:
             IOError: If books file is corrupted
         """
@@ -69,7 +70,7 @@ class DataRepository:
 
     def load_impressions(self) -> List[Impression]:
         """Load impressions from file.
-        
+
         Raises:
             IOError: If impressions file is corrupted
         """
@@ -83,7 +84,7 @@ class DataRepository:
 
     def load_status_history(self) -> List[StatusHistory]:
         """Load status history from file.
-        
+
         Raises:
             IOError: If status history file is corrupted
         """
