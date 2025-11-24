@@ -10,7 +10,7 @@
     "cover_url": "https://books.google.com/books/content?id=D14rzwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
     "status": "積読",
     "created_at": "2025-11-24T07:07:23.675345Z",
-    "updated_at": "2025-11-24T07:07:23.675376Z"
+    "updated_at": "2025-11-24T08:05:06.268554Z"
   },
   {
     "id": "9b151c62-eee9-4d05-9497-e4037978d9ad",
@@ -21,9 +21,9 @@
     "publication_date": "",
     "description": "",
     "cover_url": "https://thumbnail.image.rakuten.co.jp/@0_mall/book/cabinet/8725/9784087458725.jpg",
-    "status": "読書中",
+    "status": "積読",
     "created_at": "2025-11-24T07:09:45.543601Z",
-    "updated_at": "2025-11-24T07:09:45.543639Z"
+    "updated_at": "2025-11-24T08:00:20.621332Z"
   },
   {
     "id": "00c57504-1c19-41dd-ab6c-bb32166cd0b9",
@@ -34,9 +34,9 @@
     "publication_date": "",
     "description": "",
     "cover_url": "https://books.google.com/books/content?id=On0uvgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-    "status": "読了",
+    "status": "読書中",
     "created_at": "2025-11-24T07:09:52.971665Z",
-    "updated_at": "2025-11-24T07:09:52.971688Z"
+    "updated_at": "2025-11-24T08:00:31.144778Z"
   },
   {
     "id": "ca4303c2-5912-4932-ae9f-4688f9da5826",
@@ -47,9 +47,9 @@
     "publication_date": "",
     "description": "",
     "cover_url": "https://books.google.com/books/content?id=AClfEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-    "status": "読書中",
+    "status": "積読",
     "created_at": "2025-11-24T07:10:04.273206Z",
-    "updated_at": "2025-11-24T07:10:04.273229Z"
+    "updated_at": "2025-11-24T08:03:13.011198Z"
   },
   {
     "id": "fefd228f-1332-4291-ad40-24ef2ef6aa66",
@@ -60,9 +60,9 @@
     "publication_date": "",
     "description": "",
     "cover_url": "https://books.google.com/books/content?id=EdqnwgEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-    "status": "読了",
+    "status": "積読",
     "created_at": "2025-11-24T07:10:12.837892Z",
-    "updated_at": "2025-11-24T07:10:12.837911Z"
+    "updated_at": "2025-11-24T07:59:50.062746Z"
   },
   {
     "id": "7eefbdcf-31a3-42e3-8d8b-ac3ab7029f98",

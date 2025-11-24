@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "id": "e4db019f-25b9-4f06-b51d-a1a76e3af7a2",
+    "book_id": "fefd228f-1332-4291-ad40-24ef2ef6aa66",
+    "old_status": "読了",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T07:59:50.062774Z"
+  },
+  {
+    "id": "cbd1a901-a561-4624-80b2-6c6bbb2e0b90",
+    "book_id": "9b151c62-eee9-4d05-9497-e4037978d9ad",
+    "old_status": "読書中",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:00:03.124407Z"
+  },
+  {
+    "id": "42203a1c-3565-4606-a017-de81db232925",
+    "book_id": "9b151c62-eee9-4d05-9497-e4037978d9ad",
+    "old_status": "積読",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:00:14.474197Z"
+  },
+  {
+    "id": "d40c4d8c-1c69-456b-8bb8-766859fc5101",
+    "book_id": "9b151c62-eee9-4d05-9497-e4037978d9ad",
+    "old_status": "積読",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:00:20.621342Z"
+  },
+  {
+    "id": "50039af2-cbd8-4853-9453-8b11dc08e0fa",
+    "book_id": "00c57504-1c19-41dd-ab6c-bb32166cd0b9",
+    "old_status": "読了",
+    "new_status": "読書中",
+    "changed_at": "2025-11-24T08:00:31.144794Z"
+  },
+  {
+    "id": "eaec36cc-65c1-4629-97fe-f1e46428058e",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "積読",
+    "new_status": "読書中",
+    "changed_at": "2025-11-24T08:01:41.850356Z"
+  },
+  {
+    "id": "51563b31-9051-4c4f-9d0a-149fdbe8d2f8",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "読書中",
+    "new_status": "読書中",
+    "changed_at": "2025-11-24T08:02:00.955094Z"
+  },
+  {
+    "id": "976942db-8229-4c8a-833f-4e6594e875d5",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "読書中",
+    "new_status": "読了",
+    "changed_at": "2025-11-24T08:02:49.160286Z"
+  },
+  {
+    "id": "a0d355ae-d586-45f5-8e75-41705426a417",
+    "book_id": "ca4303c2-5912-4932-ae9f-4688f9da5826",
+    "old_status": "読書中",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:03:13.011219Z"
+  },
+  {
+    "id": "015ae62d-1797-493b-9f21-8c9bc2cb0a26",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "読了",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:03:35.644796Z"
+  },
+  {
+    "id": "e07cbd11-232f-47c0-8406-00d9ee90d842",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "積読",
+    "new_status": "読書中",
+    "changed_at": "2025-11-24T08:04:39.201813Z"
+  },
+  {
+    "id": "6c1ff4ce-e087-46df-bdb5-e9612780b722",
+    "book_id": "96913eaf-60be-4112-9cfa-29b1d4232929",
+    "old_status": "読書中",
+    "new_status": "積読",
+    "changed_at": "2025-11-24T08:05:06.268594Z"
+  }
+]

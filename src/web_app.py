@@ -74,16 +74,11 @@ def index():
     """Home page."""
     import random
 
-    books = book_service.list_books()
+    # Get fresh data from repository to ensure latest status updates
+    books = repository.load_books()
 
     # 全ての本をランダムに並べ替える
-    original_order = [book.title for book in books]
     random.shuffle(books)
-    shuffled_order = [book.title for book in books]
-
-    app.logger.info(f"Original order: {original_order}")
-    app.logger.info(f"Shuffled order: {shuffled_order}")
-    app.logger.info(f"Order changed: {original_order != shuffled_order}")
 
     # ステータス別の本数を計算
     status_counts = {}
@@ -249,9 +244,15 @@ def books_list():
 @app.route("/books/<book_id>")
 def book_detail(book_id):
     """Show book detail."""
-    try:
-        book = book_service.get_book(book_id)
-    except ValueError:
+    # Get fresh data from repository to ensure latest status
+    books = repository.load_books()
+    book = None
+    for b in books:
+        if b.id == book_id:
+            book = b
+            break
+
+    if not book:
         return "Book not found", 404
 
     try:
