@@ -452,7 +452,11 @@ main {
             f.write(css_content)
 
     def _generate_index(self, books: List[Book]) -> None:
-        """Generate the index page with all books in random order."""
+        """Generate the index page with books in random order (JS will reorder)."""
+
+        # Shuffle all books randomly (JavaScript will reorder based on status)
+        import random
+        random.shuffle(books)
 
         html_content = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -464,7 +468,7 @@ main {
 </head>
 <body>
     <main>
-        <div class="book-list" id="book-list">
+        <div class="book-list">
 """
 
         for book in books:
@@ -474,19 +478,36 @@ main {
         </div>
     </main>
     <script>
-        // ページ読み込み時に本の順序をランダムに並べ替える
+        // ページ読み込み時に本の順序を並べ替える（読書中を先頭に固定）
         document.addEventListener('DOMContentLoaded', function() {
-            const bookList = document.getElementById('book-list');
+            const bookList = document.querySelector('.book-list');
             const books = Array.from(bookList.children);
 
-            // Fisher-Yates shuffle algorithm
-            for (let i = books.length - 1; i > 0; i--) {
+            // 本をステータスで分類
+            const readingBooks = [];
+            const otherBooks = [];
+
+            books.forEach(book => {
+                const statusElement = book.querySelector('.book-status');
+                if (statusElement && statusElement.textContent === '読書中') {
+                    readingBooks.push(book);
+                } else {
+                    otherBooks.push(book);
+                }
+            });
+
+            // それ以外の本をランダムに並べ替え（Fisher-Yates shuffle）
+            for (let i = otherBooks.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [books[i], books[j]] = [books[j], books[i]];
+                [otherBooks[i], otherBooks[j]] = [otherBooks[j], otherBooks[i]];
             }
 
-            // 並べ替えた順序でDOMを更新
-            books.forEach(book => bookList.appendChild(book));
+            // 読書中の本 + シャッフルされたそれ以外の本
+            const orderedBooks = readingBooks.concat(otherBooks);
+
+            // DOMを更新
+            bookList.innerHTML = '';
+            orderedBooks.forEach(book => bookList.appendChild(book));
         });
     </script>
 </body>

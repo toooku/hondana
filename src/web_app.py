@@ -77,8 +77,15 @@ def index():
     # Get fresh data from repository to ensure latest status updates
     books = repository.load_books()
 
-    # 全ての本をランダムに並べ替える
-    random.shuffle(books)
+    # Separate books by status: reading books first, then others randomly
+    reading_books = [book for book in books if book.status == "読書中"]
+    other_books = [book for book in books if book.status != "読書中"]
+
+    # Shuffle other books randomly
+    random.shuffle(other_books)
+
+    # Combine: reading books first, then shuffled others
+    books = reading_books + other_books
 
     # ステータス別の本数を計算
     status_counts = {}
