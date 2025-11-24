@@ -14,11 +14,14 @@
 
 ### v2 新機能
 - **バーコード読み取り**: Webカメラを使用してISBNバーコードを自動認識
+- **連続登録モード**: バーコードスキャンで自動的に本を連続登録
 - **読書ステータス管理**: 積読、読書中、読了の3つのステータスで読書進捗を管理
 - **ステータス履歴**: 読書ステータスの変更履歴を自動記録
 - **書影表示**: OpenBD APIから取得した本の表紙画像を表示
 - **Markdownベースの感想管理**: 長い感想をMarkdownファイルで管理
 - **Webインターフェース**: Flask を使用したWebUIでブラウザから操作可能
+- **本の削除**: WEB UIから本と関連感想を削除可能
+- **アクセス時ランダム表示**: 静的サイトアクセス時に本の並び順がランダムに変わる
 - **データ移行**: v1からv2への自動データ移行機能
 
 ## インストール
@@ -26,7 +29,7 @@
 ### 前提条件
 
 - Python 3.8以上
-- pip または uv
+- uv または pip
 
 ### セットアップ
 
@@ -35,13 +38,16 @@
 git clone <repository-url>
 cd hondana
 
-# 仮想環境を作成（推奨）
+# uvを使用する場合（推奨）
+uv sync
+source .venv/bin/activate  # macOS/Linux
+
+# または従来のpipを使用する場合
 python3 -m venv .venv
 source .venv/bin/activate  # macOS/Linux
 # または
 .venv\Scripts\activate  # Windows
 
-# 依存関係をインストール
 pip install -e .
 ```
 
@@ -128,15 +134,17 @@ hondana delete-impression <book_id>
 # Webアプリケーションを起動
 python -m src.web_app
 
-# ブラウザで http://localhost:5000 にアクセス
+# ブラウザで http://localhost:8000 にアクセス
 ```
 
 Webインターフェースの機能：
-- ホームページ: ステータス別の本数表示
+- ホームページ: ランダム順に並べ替えられた本の表示
 - 本一覧: ステータスごとに分類された本の表示
-- 本詳細: 書影、ステータス、感想の表示
+- 本詳細: 書影、ステータス、感想の表示と削除機能
 - ステータス変更: Webから直接ステータスを変更
-- バーコード読み取り: Webカメラを使用したISBN読み取り
+- バーコード読み取り: Webカメラを使用したISBN読み取りと連続登録モード
+- 本の追加: スキャンまたは手動入力による本の登録
+- 本の削除: WEB UIから本と関連感想を削除
 - サイト生成: Webから静的サイトを生成
 
 ## プロジェクト構造
@@ -151,31 +159,35 @@ hondana/
 │   ├── book_service.py                  # 本管理ロジック
 │   ├── impression_service.py            # 感想管理ロジック（v1）
 │   ├── status_service.py                # ステータス管理ロジック（v2）
-│   ├── barcode_scanner.py               # バーコード読み取り（v2）
 │   ├── markdown_impression_service.py   # Markdown感想管理（v2）
 │   ├── markdown_converter.py            # Markdown→HTML変換（v2）
-│   ├── static_site_generator.py         # HTML生成（v1）
 │   ├── static_site_generator_v2.py      # HTML生成（v2）
 │   ├── web_app.py                       # Webインターフェース（v2）
 │   ├── data_migration.py                # データ移行ユーティリティ（v2）
-│   ├── cli.py                           # CLIインターフェース（v1）
-│   └── cli_v2_commands.py               # CLIコマンド（v2）
+│   └── cli.py                           # CLIインターフェース（統合）
 ├── tests/
+│   ├── __init__.py
+│   ├── test_book_service.py             # 本管理テスト
+│   ├── test_cli.py                      # CLIテスト
+│   ├── test_error_handling.py           # エラーハンドリングテスト
+│   ├── test_impression_service.py       # 感想管理テスト
 │   ├── test_models.py                   # モデルテスト
-│   ├── test_repository.py               # リポジトリテスト
 │   ├── test_openbd_client.py            # API統合テスト
-│   ├── test_book_service.py         # 本管理テスト
-│   ├── test_impression_service.py   # 感想管理テスト
-│   ├── test_static_site_generator.py # HTML生成テスト
-│   ├── test_cli.py                  # CLIテスト
-│   └── test_error_handling.py       # エラーハンドリングテスト
+│   └── test_static_site_generator.py    # HTML生成テスト
 ├── data/
-│   ├── books.json                   # 本のデータ
-│   └── impressions.json             # 感想のデータ
-├── output/                          # 生成されたHTMLサイト
-├── pyproject.toml                   # プロジェクト設定
-├── requirements.txt                 # 依存関係
-└── README.md                        # このファイル
+│   ├── books.json                       # 本のデータ
+│   ├── status_history.json              # ステータス変更履歴（v2）
+│   └── impressions/                     # Markdown感想ファイル（v2）
+│       └── *.md
+├── output/                              # 生成されたHTMLサイト
+│   ├── index.html
+│   ├── books/
+│   │   └── *.html
+│   └── style.css
+├── pyproject.toml                       # プロジェクト設定
+├── requirements.txt                     # 依存関係
+├── uv.lock                              # uv依存関係ロックファイル
+└── README.md                            # このファイル
 ```
 
 ## データ形式
@@ -214,20 +226,12 @@ hondana/
 ]
 ```
 
-### impressions/{book_id}.md（v2）
+### impressions/{title}_{book_id}.md（v2）
 
 ```markdown
-# ノルウェイの森 - 感想
+# 書名: ノルウェイの森
 
-## 全体的な印象
-素晴らしい作品。深い思考を促される。
-
-## 好きなシーン
-- 主人公とナオコの会話シーン
-- 森での瞑想シーン
-
-## 感想
-この作品は...
+（ユーザーが自由に感想を書く）
 ```
 
 ### impressions.json
@@ -338,11 +342,12 @@ else:
 - **requests**: HTTP通信（OpenBD API連携）
 - **hypothesis**: プロパティベーステスト
 - **click**: CLIフレームワーク
-- **pytest**: テストフレームワーク
-- **pyzbar**: バーコード読み取り（v2）
-- **opencv-python**: カメラアクセス（v2）
-- **markdown**: Markdown→HTML変換（v2）
-- **Flask**: Webインターフェース（v2）
+- **pyzbar**: バーコード読み取り（ZXingライブラリ）
+- **opencv-python**: カメラアクセス（Webカメラ連携）
+- **markdown**: Markdown→HTML変換
+- **Flask**: Webインターフェース
+- **pytest**: テストフレームワーク（開発時）
+- **pytest-cov**: カバレッジ測定（開発時）
 
 ## 開発
 
