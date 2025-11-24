@@ -1,3 +1,16 @@
+# AWSへのデプロイワークフロー
+# 必要なGitHub Secrets:
+# - AWS_ACCESS_KEY_ID: IAMユーザーのアクセスキー
+# - AWS_SECRET_ACCESS_KEY: IAMユーザーのシークレットキー
+# - AWS_REGION: AWSリージョン（例: us-east-1）
+# - S3_BUCKET_NAME: S3バケット名
+# - CLOUDFRONT_DISTRIBUTION_ID: CloudFrontディストリビューションID（オプション）
+#
+# AWSリソース作成手順:
+# 1. S3バケットを作成し、静的ウェブサイトホスティングを有効化
+# 2. CloudFrontディストリビューションを作成（S3をオリジンとして）
+# 3. IAMユーザーを作成し、S3FullAccessとCloudFrontFullAccess権限を付与
+
 name: Deploy to AWS
 
 on:

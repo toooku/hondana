@@ -33,7 +33,7 @@ env/
 *~
 
 # Data and output
-data/*.json
+# data/*.json  # 一時的にコメントアウト - AWSデプロイ用
 output/
 
 # Testing
