@@ -433,7 +433,6 @@ main {
 </head>
 <body>
     <main>
-        <h1>蔵書管理 ({len(books)}冊)</h1>
         <div class="book-list" id="book-list">
 """
 
